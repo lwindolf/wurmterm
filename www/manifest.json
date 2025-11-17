@@ -4,7 +4,7 @@
         "short_name": "WurmTerm",
         "lang": "en-US",
         "start_url": "/index.html",
-        "id": "/wurmterm",
+        "id": "/",
         "display": "standalone",
         "background_color": "white",
         "theme_color": "white",
