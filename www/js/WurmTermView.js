@@ -1,8 +1,7 @@
 // vim: set ts=4 sw=4:
 
-import { Runbook } from "./runbook.js";
+import "./WurmTermConnect.js";
 import { WurmTermBackend } from "./WurmTermBackend.js";
-import { Settings } from "./settings.js";
 
 import { debounce } from "./helpers/debounce.js";
 import { template, renderElement } from "./helpers/render.js";
@@ -136,27 +135,8 @@ export class WurmTermView extends HTMLElement {
 
     static #mainTemplate = template(`
         <div id='wtv-runbook'>
+            <x-wurmterm-connect></x-wurmterm-connect>
             <div id='wtv-probes'>
-                {{#compare status.started '!=' true}}
-                    <p>
-                        WurmTerm is a friendly terminal companion helper. Following you
-                        along SSH and k8s sessions it will monitor for problems.
-                        All cheat sheets marked with '🐛' can be executed as runbooks using WurmTerm!
-                    </p>
-
-                    <p>
-                        Install the <a href="https://github.com/lwindolf/wurmterm-backend">agent</a> 
-                        and click <button class="start">Launch</button>
-                    </p>
-
-                    <p>
-                        <span style='font-weight: bold; color: #F47'>
-                        By installing the agent and clicking 'Launch' below you will allow this page to run commands
-                        on you computer and other connected systems!</span>
-                    </p>
-                {{else}}
-                    <p>Connecting...</p>
-                {{/compare}}
             </div>          
         </div>
     </div>
@@ -175,33 +155,19 @@ export class WurmTermView extends HTMLElement {
         this.#view = document.createElement('div');
         this.#layout();
 
-        this.shadowRoot.append(this.#view);
-        this.shadowRoot.appendChild(linkElem);
-    }
-
-    async #layout() {
-        if(await Settings.get('WurmTermAutoStart')) {
-            console.log("WurmTerm: Auto starting backend connection...");
-            WurmTermBackend.connect();
-        }
-
-        const status = WurmTermBackend.getStatus();
-
-        renderElement(this.#view, WurmTermView.#mainTemplate, { status });
-        const startBtn = this.#view.querySelector('button.start');
-        if (startBtn) {
-            startBtn.onclick = (ev) => {
-                if (ev.target.classList.contains('start'))
-                    this.#start();
-            };
-        }
-
         document.addEventListener('WurmTermBackendHistoryUpdate', () => {
             debounce(() => { this.#render() }, 1000)();
         }); 
         document.addEventListener('WurmTermProbeResult', () => {
             debounce(() => { this.#render() }, 1000)();
         });
+
+        this.shadowRoot.append(this.#view);
+        this.shadowRoot.appendChild(linkElem);
+    }
+
+    async #layout() {
+        renderElement(this.#view, WurmTermView.#mainTemplate, {});
 
         // Navigation
         this.#view.querySelector('#wtv-probes').addEventListener('click', (e) => {
@@ -226,11 +192,6 @@ export class WurmTermView extends HTMLElement {
                 return;
             }
         });
-    }
-
-    #start() {
-        this.#render();
-        Runbook.enable(this.#view.querySelector('#wtv-runbook'), this.#host);
     }
 
     async #render() {
