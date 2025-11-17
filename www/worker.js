@@ -2,10 +2,7 @@
 /* jshint esversion: 6 */
 
 var cacheName = 'wurmterm';
-var filesToCache = [
-  '/node_modules/jquery/dist/jquery.min.js',
-  '/node_modules/mermaid/dist/mermaid.min.js',
-  
+var filesToCache = [ 
   '/',
   '/index.html',
   '/css/styles.css',  
