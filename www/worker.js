@@ -7,13 +7,8 @@ var filesToCache = [
   '/index.html',
   '/css/styles.css',  
   '/js/app.js',
-  '/js/notebook.js',
-  '/js/probeapi.js',
-  '/js/settings.js',
   '/js/renderer/netmap.js',
-  '/js/renderer/perf-flamegraph.js',
-
-  'default.json'
+  '/js/renderer/perf-flamegraph.js'
 ];
 
 /* Start the service worker and cache all of the app's content */
