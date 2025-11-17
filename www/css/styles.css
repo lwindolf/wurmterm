@@ -1,0 +1,169 @@
+body {
+    font-family: Helvetica;
+    font-size:10pt;
+    background:#444;
+    color:#cce;
+    margin: 0;
+    padding: 0;
+}
+
+.main {
+    padding: 12px;
+    display: none;
+    max-width: 1024px;
+    margin: auto;
+}
+
+#info {
+    background: #eee;
+    color: black;
+    padding: 6px 12px;
+}
+
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+.emoji {
+    vertical-align: middle;
+}
+
+img.emojione {
+    margin: 0px !important;
+    display: inline !important;
+    height: auto;
+}
+
+#visualizedHost {
+    font-weight: bold;
+    color: #333;
+}
+#visualContainer {
+    display: none;
+}
+#visual {
+    height: 33%;
+    border: 1px solid silver;
+    background: white;
+    margin-bottom: 12px;
+    margin-top: 6px;
+    overflow: auto;
+}
+
+#visual .label {
+    background: white;
+}
+
+#visual .node rect {
+    stroke: #999;
+    fill: #fff;
+    stroke-width: 1.5px;
+}
+#visual .edgePath path {
+    stroke: #333;
+    stroke-width: 1.5px;
+}
+#visual .local > rect {
+    fill: #ffc;
+    stroke-width: 2px;
+}
+#visual .local_unused > rect {
+    fill: #fff;
+    stroke-width: 2px;
+}
+#visual .null > rect, .null > foreignobject {
+    stroke-width: 0;
+}
+#visual .previousNode {
+    background: #ccf;
+}
+#visual a.resolve {
+    color:brown;
+    text-decoration:none;
+}
+
+.rendererForm {
+    padding:12px;
+    background: #eee;
+    color: black;
+}
+
+
+.title {
+    color:  white;
+    margin-right: 12px;
+}
+
+#menubar {
+    background: #222;
+    padding: 12px 6px;
+}
+#menu {
+    max-width: 1024px;
+    margin: auto;
+}
+
+#menu a {
+    color: #AAC;
+    text-decoration: none;
+    cursor: pointer;
+}
+#menu a:hover {
+    text-decoration: underline;
+}
+#menu a:active {
+    color: white;
+    font-weight: bold;
+}
+
+#footer {
+    background: #777;
+    border: 1px solid lightgray;
+    padding: 12px;
+    position: relative;
+    bottom: 0px;
+}
+
+#history {
+    margin: 3px;
+    margin-block-start: 0;
+    padding-inline-start: 0;
+}
+#history li {
+    display:inline-block;
+    padding:3px;
+    margin-right:3px;
+    margin-bottom:3px;
+    background: #ddd;
+    color: black;
+}
+#history li:hover {
+    text-decoration: underline;
+    cursor: pointer;
+    color: white;
+}
+
+#settings h2 {
+    border-bottom: 1px solid #ddd;
+}
+
+#settings .probe {
+    display: inline-block;
+    background: #bbb;
+    margin:3px;
+    padding:3px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#settings .box {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background: #eee;
+    padding: 6px; 
+    margin:6px 0;
+    min-height: 100px;
+    color: black;
+}

@@ -1,0 +1,146 @@
+:host {
+    --wurmTermProbeCritical: #c44;
+    --wurmTermProbeCriticalTitle: #fff;
+    --wurmTermProbeWarningBg: #ffa500;
+    --wurmTermProbeWarningTitle: #000;
+}
+
+.hosts {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.hosts .host.disconnected {
+    filter: grayscale(60%);
+}
+.hosts .host.disconnected .name {
+    color: silver;
+}
+.hosts .host.disconnected .name::after {
+    content: ' (disconnected)';
+}
+
+.hosts .host .name {
+    color:#ccc;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#wtv-runbook {
+    background: #fff;
+    color: #444;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.2rem;
+}
+
+.wurmTermConnect {
+        background: #ccc;
+        color: #444;
+        width: auto;
+        padding: 0.3rem 0.6rem;
+        z-index: 999;
+        margin: 0.6rem 0;
+        border-radius: 0.2rem;
+}
+
+.wurmTermConnect pre,
+.wurmTermConnect code {
+        background: #eee;
+        color: #777;
+        padding: 0.3rem;
+}
+
+.wurmTermConnect .host .name,
+.wurmTermWidget .host .name {
+        margin: 0.2rem 0.05rem;
+        padding: 0 0.4rem;
+        color:#444;
+        background: #ccc;
+        border: 1px solid #b7b7b7;
+        display: inline-block;
+        cursor:pointer;
+        border-radius: 0.2rem;
+        font-size: 1rem;
+}
+
+.wurmTermSettings .probe {
+        border: 1px solid #eee;
+        border-radius: 4px;
+        padding: 6px; 
+        margin:6px 0;
+        min-height: 100px;
+}
+
+.wurmTermSettings .probe {
+        display: inline-block;
+        color: var(--tblue);
+        border: 1px solid var(--tblue);
+        margin:3px;
+        padding:3px 6px;
+        border-radius: 3px;
+        cursor: pointer;
+}
+
+.probe {
+        margin: .2rem .1rem;
+        padding: 0 .4rem;
+        white-space: nowrap;
+        display: inline-block;
+        cursor: pointer;
+        color: #777;
+        border: 1px solid #777;
+        border-radius: .2rem;
+        font-size: 1rem;
+}
+
+.probe.severity_warning:before {
+    content: '⚠ '
+}
+.probe.severity_critical:before {
+    content: '⚡ '
+}
+.probe.severity_invalid:before {
+    content: '❓ '
+}
+
+.probe.severity_critical {
+        background: var(--wurmTermProbeCritical);
+        color: var(--wurmTermProbeCriticalTitle);
+        border: 1px solid var(--wurmTermProbeCritical);
+}
+
+.probe.severity_warning {
+        background: var(--wurmTermProbeWarningBg);
+        color: var(--wurmTermProbeWarningTitle);
+        border: 1px solid var(--wurmTermProbeWarningBg);
+}
+
+.probe.severity_normal {
+        color: #2c84fa;
+        border: 1px solid #2c84fa;
+}
+
+.output {
+        background: black;
+        color: white;
+        padding: 0.4rem;
+        margin-top: 0.4rem;
+        border-radius: 0.2rem;
+        font-family: monospace;
+        max-height: 50vh;
+        overflow: scroll;
+}
+
+.check_info {
+        vertical-align: middle;
+        display: inline-block;
+        padding: 0.2rem .4rem;
+}
+
+.date {
+        margin: 6px 0 32px 0;
+        filter: brightness(50%);
+        font-size: 0.8rem;
+}
+

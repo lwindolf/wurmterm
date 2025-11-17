@@ -1,0 +1,23 @@
+{
+    "name": "wurmterm",
+    "main": "www/js/app.js",
+    "description": "WurmTerm, a friendly wurm walking along your SSH / k8s sessions. Frontend part.",
+    "license": "GPL-3.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lwindolf/wurmterm.git"
+    },
+    "dependencies": {
+        "handlebars": "^4.7.8",
+        "mermaid": "^11.10.0",
+        "websocket": "^1.0.34"
+    },
+    "devDependencies": {
+        "jshint": "^2.13.6"
+    },
+    "scripts": {
+        "test": "cd www && jshint worker.js js/*.js js/helpers/*.js js/renderer/*.js",
+        "start": "cd www && npx serve -S",
+        "build": "./build.sh"
+    }
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+	<meta charset="UTF-8">
+	<title>WurmTerm</title>
+
+	<link rel="stylesheet" type='text/css' href='css/styles.css'/>
+
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="white"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="js/vendor/handlebars.min.js"></script>
+    <script src="js/vendor/showdown.min.js"></script>
+</head>
+<body>
+	<nav id='menubar'>
+	<div id='menu'>
+		<span class='title'>🐛 WurmTerm</span>
+		[ <a data-view='main'>Home</a> ]
+		<!--[ <a data-view='runbook'>Runbook</a> ]-->
+		[ <a data-view='settings'>Settings</a> ]
+	</div>
+	</nav>
+	
+	<div class='main' id='info'>
+	</div>
+
+	<div class='main' id='main'>
+		<x-wurmterm></x-wurmterm>
+		<div id='visualContainer'>
+			Visualization
+			<select id='renderer'>
+				<option value='netmap'>netmap</option>
+				<option value='perfFlameGraph'>perf flamegraph</option>
+			</select>
+			Host
+			<span id='visualizedHost'></span>
+			<div id='visual'>
+			</div>
+		</div>
+	</div>
+
+	<div class='main' id='notebook'>
+		Host <input type='text' id='notebook-host' list='notebook-hosts' placeholder='localhost or SSH host' value='localhost'/>
+		<datalist id='notebook-hosts'>
+			<option value='localhost'>
+		</datalist>
+
+		Runbook
+		<select id='runbook-name'>
+			<!-- FIXME load list automatically -->
+			<option default>default</option>
+			<option>du</option>
+			<option>systemd</option>
+			<option>arp</option>
+		</select>
+	</div>
+
+	<div class='main' id='settings'>
+	</div>
+
+	<script type="module">
+		import './js/WurmTermView.js';
+		import { setupApp } from './js/app.js';
+
+		setupApp();
+	</script>
+</body>
+</html>
