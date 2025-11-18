@@ -25,6 +25,7 @@ export class WurmTermView extends HTMLElement {
   
     static #allHostsTemplate = template(`
     <div class='wurmTermWidget'>
+        <h3>Connected</h3>
         <div class='hosts'>
             {{#each results.hosts}}
             <div class='host'>
@@ -35,11 +36,17 @@ export class WurmTermView extends HTMLElement {
                     <span class='probe severity_ok'>OK</span>
                 {{/unless}}
 
-                {{#eachSorted probes}}
-                    <a data-host='{{host}}' data-probe='{{@key}}' class='probe severity_{{probeSeverity}}'>
-                        {{@key}}
-                    </a>
-                {{/eachSorted}}
+                {{#each probes}}
+                    {{#if probeSeverity}}
+                    {{#compare probeSeverity '!==' 'normal'}}
+                    {{#compare probeSeverity '!==' 'empty'}}
+                        <a data-probe='{{@key}}' data-host='{{@../key}}' class='probe severity_{{probeSeverity}}'>
+                            {{@key}}
+                        </a>
+                    {{/compare}}
+                    {{/compare}}
+                    {{/if}}
+                {{/each}}
             </div>
             {{else}}
                 <p>No results available yet...</p>
@@ -59,6 +66,18 @@ export class WurmTermView extends HTMLElement {
         {{else}}
             <p>No SSH history found.</p>
         {{/each}}
+
+        <h3>kubernetes</h3>
+
+        {{#each history.kubectxt}}
+            <span class='host'>
+                <a data-host='{{this}}' class='name history'>
+                    {{this.name}}/{{this.context.namespace}}
+                </a>
+            </span>
+        {{else}}
+            <p>No other kubectl contexts found.</p>
+        {{/each}}
     </div>
     `);
 
@@ -77,11 +96,11 @@ export class WurmTermView extends HTMLElement {
                     <span class='probe severity_ok'>OK</span>
                 {{/unless}}
                 <div>
-                {{#each probes}}
+                {{#eachSorted probes}}
                     <a data-host='{{host}}' data-probe='{{@key}}' class='probe severity_{{probeSeverity}}'>
                         {{@key}}
                     </a>
-                {{/each}}
+                {{/eachSorted}}
                 </div>
             </div>
             {{/each}}
@@ -93,7 +112,7 @@ export class WurmTermView extends HTMLElement {
                 {{#with (lookup probes ../probe)}}
                     <hr/>
                     <h3>
-                        Probe Results for <span class="probe severity_{{probeSeverity}}">{{probe}}</span>
+                        <span class="probe severity_{{probeSeverity}}">{{probe}}</span> Probe Results
                     </h3>
                     <div class="output">
                         {{#compare stdout.length '>' 0}}
@@ -205,7 +224,7 @@ export class WurmTermView extends HTMLElement {
                 WurmTermView.#allHostsTemplate,
                 {
                     results: { hosts: results.hosts },
-                    history: WurmTermBackend.getHistory()
+                    history: WurmTermBackend.getHistory(),
                 }
             );
             return;
@@ -216,7 +235,8 @@ export class WurmTermView extends HTMLElement {
             results : { hosts: {} },
             host: this.#host,
             probe: this.#probe,
-            probeDetails
+            probeDetails,
+            singleHost: true
         };
         if(results.hosts[this.#host])
             singleHost.results.hosts[this.#host] = results.hosts[this.#host];

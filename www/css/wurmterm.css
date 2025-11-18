@@ -121,6 +121,12 @@
         border: 1px solid #2c84fa;
 }
 
+.probe.severity_ok {
+        background: #8cdf90;
+        border: 1px solid #4caf50;
+        color: #204020;
+}
+
 .output {
         background: black;
         color: white;

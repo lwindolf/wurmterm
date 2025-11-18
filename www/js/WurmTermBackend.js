@@ -38,7 +38,7 @@ class WurmTermBackend {
 
 	static #staticConstructor = (function() {
 		WurmTermBackend.history.hosts = [];
-		WurmTermBackend.history.kubectxt = {};
+		WurmTermBackend.history.kubectxt = [];
 		WurmTermBackend.results.hosts = {};
 		WurmTermBackend.results.kubectxt = {};
 
@@ -142,11 +142,18 @@ class WurmTermBackend {
 						}
 					}
 					if (d.cmd === 'history') {
-						a.history.hosts = d.result;
+						if(d.result)
+							a.history.hosts = d.result;
+						else
+							console.error("Invalid hosts history data received from backend!");
 						document.dispatchEvent(new CustomEvent('WurmTermBackendHistoryUpdate', { detail: a.history }));
 					}
 					if (d.cmd === 'kubectxt') {
-						a.history.kubectxt = d.result;
+						console.log("Received kubectxt history:", d);
+						if(d.result)
+							a.history.kubectxt = d.result;
+						else
+							console.error("Invalid kubectxt history data received from backend!");
 						document.dispatchEvent(new CustomEvent('WurmTermBackendHistoryUpdate', { detail: a.history }));
 					}
 					if (d.cmd === 'hosts') {
@@ -258,7 +265,7 @@ class WurmTermBackend {
 		// filter for current connections
 		return {
 			hosts    : WurmTermBackend.history.hosts.filter((h) => !(h in WurmTermBackend.results.hosts)),
-			kubectxt : {}	// FIXME
+			kubectxt : WurmTermBackend.history.kubectxt.filter((c) => !(c in WurmTermBackend.results.kubectxt))
 		}
 	}
 
