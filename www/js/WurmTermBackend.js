@@ -35,6 +35,7 @@ class WurmTermBackend {
 	static probes = {};					// definition of probes
 	static history = {};				// history of hosts and kubectl contexts
 	static results = {};				// connected hosts and kubectxt and their callbacks and results
+	static localnet = {};				// local network discovery results
 
 	static #staticConstructor = (function() {
 		WurmTermBackend.history.hosts = [];
@@ -133,6 +134,7 @@ class WurmTermBackend {
 							ws.send("probes");
 							ws.send("history");
 							ws.send("kubectxt");
+							ws.send("localnet");
 						} else {
 							a.#stateChanged({
 								auth        : false,
@@ -155,6 +157,10 @@ class WurmTermBackend {
 						else
 							console.error("Invalid kubectxt history data received from backend!");
 						document.dispatchEvent(new CustomEvent('WurmTermBackendHistoryUpdate', { detail: a.history }));
+					}
+					if (d.cmd === 'localnet') {
+						a.localnet = d.result;
+						document.dispatchEvent(new CustomEvent('WurmTermBackendLocalNetUpdate', { detail: a.localnet }));
 					}
 					if (d.cmd === 'hosts') {
 						a.#updateHostsCb(d.result);
@@ -261,6 +267,10 @@ class WurmTermBackend {
 		return WurmTermBackend.results;
 	}
 
+	static getLocalNet() {
+		return WurmTermBackend.localnet;
+	}
+
 	static getHistory() {
 		// filter for current connections
 		return {
@@ -279,6 +289,7 @@ class WurmTermBackend {
 
 		try {
 			a.ws.send(`hosts`);
+			a.ws.send("status");	// FIXME remove me
 		} catch (e) { }
 
 		if (a.updateHostsTimeout)

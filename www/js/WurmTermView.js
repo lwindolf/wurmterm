@@ -52,7 +52,7 @@ export class WurmTermView extends HTMLElement {
                 <p>No results available yet...</p>
             {{/each}}
         </div>
-
+    
         <hr/>
 
         <h3>SSH History</h3>
@@ -77,6 +77,27 @@ export class WurmTermView extends HTMLElement {
             </span>
         {{else}}
             <p>No other kubectl contexts found.</p>
+        {{/each}}
+
+        <hr/>
+
+        <h3>Local Network</h3>
+
+        {{#each localnet.hosts}}
+            <div class='host'>
+                <a data-host='{{@key}}' class='name history'>
+                    {{@key}}
+                </a>
+                {{#each services}}
+                    {{#if url}}
+                        <a href="{{url}}" target="_blank" class='probe severity_normal'>{{name}}</a>
+                    {{else}}
+                        <span class='probe'>{{name}}</span>
+                    {{/if}}
+                {{/each}}
+            </div>
+        {{else}}
+            <p>No local network devices found.</p>
         {{/each}}
     </div>
     `);
@@ -180,6 +201,9 @@ export class WurmTermView extends HTMLElement {
         document.addEventListener('WurmTermProbeResult', () => {
             debounce(() => { this.#render() }, 1000)();
         });
+        document.addEventListener('WurmTermBackendLocalNetUpdate', () => {
+            debounce(() => { this.#render() }, 1000)();
+        });
 
         this.shadowRoot.append(this.#view);
         this.shadowRoot.appendChild(linkElem);
@@ -225,6 +249,7 @@ export class WurmTermView extends HTMLElement {
                 {
                     results: { hosts: results.hosts },
                     history: WurmTermBackend.getHistory(),
+                    localnet: WurmTermBackend.getLocalNet()
                 }
             );
             return;
@@ -233,6 +258,7 @@ export class WurmTermView extends HTMLElement {
         // ... or a per host + optional probe drilldown + optional runbook
         let singleHost = {
             results : { hosts: {} },
+            localnet: WurmTermBackend.getLocalNet(),
             host: this.#host,
             probe: this.#probe,
             probeDetails,
