@@ -67,6 +67,8 @@ export class WurmTermView extends HTMLElement {
             <p>No SSH history found.</p>
         {{/each}}
 
+        <hr/>
+
         <h3>kubernetes</h3>
 
         {{#each history.kubectxt}}

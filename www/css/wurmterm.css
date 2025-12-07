@@ -5,12 +5,6 @@
     --wurmTermProbeWarningTitle: #000;
 }
 
-.hosts {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-}
-
 .hosts .host.disconnected {
     filter: grayscale(60%);
 }
