@@ -36,7 +36,7 @@ export class WurmTermView extends HTMLElement {
                     <span class='probe severity_ok'>OK</span>
                 {{/unless}}
 
-                {{#each probes}}
+                {{#each children}}
                     {{#if probeSeverity}}
                     {{#compare probeSeverity '!==' 'normal'}}
                     {{#compare probeSeverity '!==' 'empty'}}
@@ -51,8 +51,29 @@ export class WurmTermView extends HTMLElement {
             {{else}}
                 <p>No results available yet...</p>
             {{/each}}
+
+            {{#each results.kubectxt}}
+            <div class='host'>
+                <a class='name' data-kubectxt='{{@key}}' title='{{@key}}'>
+                    {{this.name}}
+                </a>
+                {{#each children}}
+                <a class='probe'>
+                    {{@key}}
+                    <span class='probe severity_ok'>{{#hashLength children}}{{/hashLength}}</span>
+                    {{#each children}}
+                        {{#compare severity '!==' 'ok'}}
+                            <a class='probe severity_{{severity}}'>
+                                {{@key}}
+                            </a>
+                        {{/compare}}
+                    {{/each}}
+                </a>
+                {{/each}}
+            </div>
+            {{/each}}
         </div>
-    
+
         <hr/>
 
         <h3>SSH History</h3>
@@ -69,12 +90,12 @@ export class WurmTermView extends HTMLElement {
 
         <hr/>
 
-        <h3>kubernetes</h3>
+        <h3>k8s Contexts</h3>
 
         {{#each history.kubectxt}}
             <span class='host'>
                 <a data-host='{{this}}' class='name history'>
-                    {{this.name}}/{{this.context.namespace}}
+                    <small>{{this.name}}</small><br/><b>{{this.context.namespace}}</b>
                 </a>
             </span>
         {{else}}
@@ -119,7 +140,7 @@ export class WurmTermView extends HTMLElement {
                     <span class='probe severity_ok'>OK</span>
                 {{/unless}}
                 <div>
-                {{#eachSorted probes}}
+                {{#eachSorted children}}
                     <a data-host='{{host}}' data-probe='{{@key}}' class='probe severity_{{probeSeverity}}'>
                         {{@key}}
                     </a>
@@ -132,7 +153,7 @@ export class WurmTermView extends HTMLElement {
         {{#if probe}}
         <div class='details'>
             {{#with (lookup results.hosts host)}}
-                {{#with (lookup probes ../probe)}}
+                {{#with (lookup children ../probe)}}
                     <hr/>
                     <h3>
                         <span class="probe severity_{{probeSeverity}}">{{probe}}</span> Probe Results
@@ -242,14 +263,14 @@ export class WurmTermView extends HTMLElement {
     async #render() {
         const results = WurmTermBackend.getResults();
         const probeDetails = WurmTermBackend.getProbeByName(this.#probe);
-
+console.log(results);
         // Either provide all probes for all hosts
         if(!this.#host) {
             renderElement(
                 this.#view.querySelector('#wtv-probes'),
                 WurmTermView.#allHostsTemplate,
                 {
-                    results: { hosts: results.hosts },
+                    results,
                     history: WurmTermBackend.getHistory(),
                     localnet: WurmTermBackend.getLocalNet()
                 }
@@ -260,14 +281,13 @@ export class WurmTermView extends HTMLElement {
         // ... or a per host + optional probe drilldown + optional runbook
         let singleHost = {
             results : { hosts: {} },
-            localnet: WurmTermBackend.getLocalNet(),
+            localnet: { },
             host: this.#host,
             probe: this.#probe,
             probeDetails,
             singleHost: true
         };
-        if(results.hosts[this.#host])
-            singleHost.results.hosts[this.#host] = results.hosts[this.#host];
+        singleHost.results.hosts[this.#host] = results.hosts[this.#host];
 
         renderElement(
             this.#view.querySelector('#wtv-probes'),

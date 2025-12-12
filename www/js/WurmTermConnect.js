@@ -35,24 +35,28 @@ export class WurmTermConnect extends HTMLElement {
                         on you computer and other connected systems!</span>
                     </p>
                 {{else}}
-                        {{#if status.authFailure}}
-                        <p>
-                                <div id='wurmTermAuth'>
-                                Passwort: <input type='password' name='password'/>
-                                <button id="wurmTermPasswordSet">Login</button>
-                                </div>
-                        </p>
-                        <p>
-                                In case you have forgotten your password set a new one by running
-                                <code>wurm configure</code>
-                        </p>
-                        {{/if}}
+                    {{#if status.authFailure}}
+                    <p>
+                            <div id='wurmTermAuth'>
+                            Passwort: <input type='password' name='password'/>
+                            <button id="wurmTermPasswordSet">Login</button>
+                            </div>
+                    </p>
+                    <p>
+                            In case you have forgotten your password set a new one by running
+                            <code>wurm configure</code>
+                    </p>
+                    {{/if}}
 
-                        {{#compare status.connected '!=' true}}
-                                <p>Connecting...</p>
-                                {{else}}
-                                <p>Connected!</p>
-                                {{/compare}}
+                    {{#compare status.connected '!=' true}}
+                        <p>Connecting...</p>
+                    {{else}}
+                        <p>Connected!</p>
+                    {{/compare}}
+
+                    {{#if status.error}}
+                            <p>{{status.error}}</p>
+                    {{/if}}
                 {{/compare}}
             </div>
         </div>

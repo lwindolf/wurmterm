@@ -31,6 +31,10 @@ window.Handlebars.registerHelper('ifFalse', function (v1, options) {
   return options.inverse(this);
 });
 
+window.Handlebars.registerHelper('hashLength', function (obj, options) {
+  return Object.keys(obj).length;
+});
+
 window.Handlebars.registerHelper('compare', function (v1, operator, v2, options) {
   var operators = {
     '==': v1 == v2 ? true : false,

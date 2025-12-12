@@ -14,6 +14,7 @@ class WurmTermBackend {
 	static defaultHostProbing = true;
 	static defaultKubectxtProbing = true;
 	static defaultAutoStart = false;
+	static minBackendVersion = '0.9.13';
 
 	// state
 	static #status = {
@@ -25,7 +26,7 @@ class WurmTermBackend {
 
 		// error state
 		authFailure : false,			// true if credentials were wrong
-		error       : "Uninitialized"	// Human readable error string to display
+		error       : undefined			// Human readable error string to display
 	}
 	static runs = {};					// promises for dedicated command runs (e.g. from notebook)
 	static ws;							// websocket
@@ -120,9 +121,22 @@ class WurmTermBackend {
 				a.#stateChanged({ error: "Backend websocket not available!" });
 				a.reconnect();
 			};
-			ws.onmessage = function (e) {
+			ws.onmessage = async function (e) { 
 				try {
 					let d = JSON.parse(e.data);
+					if (d.cmd === 'version') {
+						const minVersionParts = a.minBackendVersion.split('.');
+						const minVersionNr = minVersionParts[0]*100*100 + minVersionParts[1]*100 + minVersionParts[2];
+						const versionParts = ('' + d.value).split('.');
+						const versionNr = versionParts[0]*100*100 + versionParts[1]*100 + versionParts[2];
+						if (versionNr < minVersionNr) {
+							a.#stateChanged({
+								error: `⛔ Incompatible backend version ${d.value} (need at least ${a.minBackendVersion}). Please upgrade!`
+							});
+						} else {
+							ws.send("auth " + await Settings.get('WurmTermBackendPassword', ''));
+						}
+					}
 					if (d.cmd === 'auth') {
 						if (d.result == 0) {
 							a.#stateChanged({
@@ -151,12 +165,17 @@ class WurmTermBackend {
 						document.dispatchEvent(new CustomEvent('WurmTermBackendHistoryUpdate', { detail: a.history }));
 					}
 					if (d.cmd === 'kubectxt') {
-						console.log("Received kubectxt history:", d);
 						if(d.result)
 							a.history.kubectxt = d.result;
 						else
 							console.error("Invalid kubectxt history data received from backend!");
 						document.dispatchEvent(new CustomEvent('WurmTermBackendHistoryUpdate', { detail: a.history }));
+					}
+					if (d.cmd === 'probe_kubectxt') {
+						if (d.result && d.result.id)
+							a.results.kubectxt[d.result.id] = d.result;
+						else
+							console.error("Invalid probe_kubectxt data received from backend!");
 					}
 					if (d.cmd === 'localnet') {
 						a.localnet = d.result;
@@ -186,7 +205,7 @@ class WurmTermBackend {
 					}
 
 					if (d.cmd === 'probe') {
-						let p = a.results.hosts[d.host]?.probes[d.probe];
+						let p = a.results.hosts[d.host]?.children[d.probe];
 
 						if (undefined === p) {
 							console.error(`Message ${d} misses probe info or does not match known probe!`);
@@ -220,7 +239,7 @@ class WurmTermBackend {
 								}
 
 								// Aggregate probe severities and flag host as having problems or not
-								a.results.hosts[d.host].probes[d.probe] = d;
+								a.results.hosts[d.host].children[d.probe] = d;
 								if (d.probeSeverity === 'critical' ||
 									d.probeSeverity === 'warning')
 									a.results.hosts[d.host].problems = true;
@@ -237,7 +256,6 @@ class WurmTermBackend {
 			};
 			ws.onopen = async (e) => {
 				a.#stateChanged({ connected: true });
-				ws.send("auth " + await Settings.get('WurmTermBackendPassword', ''));
 			};
 			a.ws = ws;
 		} catch (e) {
@@ -274,8 +292,8 @@ class WurmTermBackend {
 	static getHistory() {
 		// filter for current connections
 		return {
-			hosts    : WurmTermBackend.history.hosts.filter((h) => !(h in WurmTermBackend.results.hosts)),
-			kubectxt : WurmTermBackend.history.kubectxt.filter((c) => !(c in WurmTermBackend.results.kubectxt))
+			hosts    : (WurmTermBackend.history?.hosts || []).filter((h) => !(h in WurmTermBackend.results.hosts)),
+			kubectxt : (WurmTermBackend.history?.kubectxt?.contexts || []).filter((c) => c.name !== WurmTermBackend.results.kubectxt["current-context"])
 		}
 	}
 
@@ -283,13 +301,22 @@ class WurmTermBackend {
 		return WurmTermBackend.probes[name];
 	};
 
-	// Setup periodic host update fetch and callback
+	// Setup periodic host / k8s update fetch and callback
 	static async updateHosts() {
 		let a = WurmTermBackend;
 
 		try {
 			a.ws.send(`hosts`);
-			a.ws.send("status");	// FIXME remove me
+			const ctxt = WurmTermBackend.history?.kubectxt?.["current-context"];
+			if (ctxt) {
+				const namespace = WurmTermBackend.history.kubectxt.contexts.find(c => c.name === ctxt)?.context?.namespace;	
+				if (namespace)
+					a.ws.send(`probe_kubectxt ${ctxt}/${namespace}`);
+				else
+					console.error("No namespace found for current kubectxt!");
+			} else {
+				console.error("No current kubectxt found!");
+			}
 		} catch (e) { }
 
 		if (a.updateHostsTimeout)
@@ -340,10 +367,10 @@ class WurmTermBackend {
 		if (host !== 'localhost' && a.probes[name].localOnly === 'True')
 			return;
 
-		if (undefined === a.results.hosts[host].probes[name])
-			a.results.hosts[host].probes[name] = {};
+		if (undefined === a.results.hosts[host].children[name])
+			a.results.hosts[host].children[name] = {};
 
-		let p = a.results.hosts[host].probes[name];
+		let p = a.results.hosts[host].children[name];
 		p.updating = true;
 		p.timestamp = Date.now();
 
@@ -354,7 +381,7 @@ class WurmTermBackend {
 	// update method
 	static startProbes(host) {
 		let a = WurmTermBackend;
-		a.results.hosts[host] = { probes: {} };
+		a.results.hosts[host] = { children: {} };
 
 		Object.keys(a.probes).forEach(function (p) {
 			if (a.probes[p].initial)
